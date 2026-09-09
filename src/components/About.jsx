@@ -31,9 +31,9 @@ export default function About() {
           <div className="about-media-col">
             <div className="profile-frame-wrap">
               {/* Director Portrait with automatic procedural fallback */}
-              <ProfileWithFallback 
-                src="/assets/profile.jpg" 
-                alt="Krishna Kant Sharma (KK) - Cineverse" 
+              <ProfileWithFallback
+                src="/assets/profile.jpg"
+                alt="Krishna Kant Sharma (KK) - Cineverse"
               />
 
               {/* Lens markings & film borders */}
@@ -48,11 +48,6 @@ export default function About() {
                 <span className="caption-director">KRISHNA KANT SHARMA</span>
                 <span className="caption-tag">FOUNDER / CINEVERSE</span>
               </div>
-            </div>
-
-            {/* Hint for developer/creator */}
-            <div className="profile-file-hint">
-              <span>PHOTO PATH:</span> <code>public/assets/profile.jpg</code>
             </div>
           </div>
 
