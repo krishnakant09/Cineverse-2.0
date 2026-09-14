@@ -8,6 +8,7 @@ import ExploreVerse from './components/ExploreVerse';
 import EditingTools from './components/EditingTools';
 import About from './components/About';
 import Footer from './components/Footer';
+import AiChatbot from './components/AiChatbot';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -34,6 +35,9 @@ export default function App() {
 
       {/* End Credits Footer */}
       <Footer />
+
+      {/* CINE-AI Chatbot Assistant in Bottom-Right Corner */}
+      <AiChatbot />
     </div>
   );
 }

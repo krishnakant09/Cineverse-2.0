@@ -64,6 +64,11 @@
   - One-click email copy with real-time visual feedback (`cineversebykk@gmail.com`).
   - Direct links to Instagram DM and social presence.
 
+- **🤖 CINE-AI Studio Copilot (Bottom-Right Corner)**:
+  - Floating cinematic HUD assistant with live 24fps timecode, pulsating REC indicator, and ambient neon glow.
+  - Interactive knowledge engine that answers client inquiries about KK's background, editing styles, software tools, showcase cuts, turnaround times, and booking info.
+  - Interactive quick-prompt chips, streaming typewriter responses, copy email shortcut, and Instagram DM deep-links.
+
 - **🎞️ 35mm Analog Film Grain Overlay**:
   - Low-overhead SVG turbulence texture layer providing an authentic analog cinematic feel across the entire page.
 
@@ -98,6 +103,7 @@ Cineverse 2.0/
 │   ├── assets/                # Internal static assets
 │   ├── components/
 │   │   ├── About.jsx          # Director bio, credentials, and career metrics
+│   │   ├── AiChatbot.jsx      # CINE-AI floating chatbot assistant & HUD window
 │   │   ├── EditingTools.jsx   # Software stack and capability breakdown
 │   │   ├── ExploreVerse.jsx   # Visual styles and editing philosophy section
 │   │   ├── FilmGrain.jsx      # 35mm analog film grain SVG overlay
@@ -111,6 +117,7 @@ Cineverse 2.0/
 │   │   ├── ProjectModal.jsx   # Fullscreen project case study modal
 │   │   └── SelectedWork.jsx   # Work showcase with category filtering
 │   ├── data/
+│   │   ├── chatbotKnowledge.js# CINE-AI knowledge base & intent response engine
 │   │   ├── projects.js        # Project database (titles, tags, colors, media links)
 │   │   ├── styles.js          # Style definitions and keywords
 │   │   └── tools.js           # Editing tools and capabilities data
