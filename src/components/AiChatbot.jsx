@@ -38,6 +38,8 @@ export default function AiChatbot() {
   ]);
 
   const messagesEndRef = useRef(null);
+  const messagesAreaRef = useRef(null);
+  const chatWindowRef = useRef(null);
   const inputRef = useRef(null);
 
   // Live 24fps timecode HUD
@@ -55,12 +57,112 @@ export default function AiChatbot() {
     return () => clearInterval(interval);
   }, []);
 
-  // Auto-scroll on new message
+  // Auto-scroll inside messages container without triggering global window scroll
   useEffect(() => {
-    if (isOpen) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (isOpen && messagesAreaRef.current) {
+      const el = messagesAreaRef.current;
+      requestAnimationFrame(() => {
+        el.scrollTo({
+          top: el.scrollHeight,
+          behavior: 'smooth'
+        });
+      });
     }
   }, [messages, isTyping, isOpen]);
+
+  // Isolate scroll within the chatbot window so the home screen behind never scrolls
+  useEffect(() => {
+    const windowEl = chatWindowRef.current;
+    if (!isOpen || !windowEl) return;
+
+    // Lock background scroll on mobile devices while chatbot is open
+    const isMobile = window.innerWidth <= 768;
+    const prevBodyOverflow = document.body.style.overflow;
+    if (isMobile) {
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Intercept wheel events so background page never scrolls while cursor is over chat window
+    const handleWheel = (e) => {
+      const messagesArea = messagesAreaRef.current;
+      const quickPrompts = windowEl.querySelector('.chat-quick-prompts');
+
+      // Allow horizontal scrolling on quick prompts
+      if (quickPrompts && quickPrompts.contains(e.target)) {
+        if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+          return;
+        }
+      }
+
+      if (messagesArea && messagesArea.contains(e.target)) {
+        const { scrollTop, scrollHeight, clientHeight } = messagesArea;
+        const maxScroll = scrollHeight - clientHeight;
+
+        // If messages do not overflow, cancel wheel so home screen doesn't scroll
+        if (maxScroll <= 1) {
+          e.preventDefault();
+          return;
+        }
+
+        // When reaching top or bottom limit, prevent scroll chaining to background
+        if ((e.deltaY < 0 && scrollTop <= 0) || (e.deltaY > 0 && scrollTop >= maxScroll - 1)) {
+          e.preventDefault();
+          return;
+        }
+
+        // Allow natural scroll inside messagesArea
+        return;
+      }
+
+      // If wheel event occurs over header, input bar, footer, or anywhere else on chat window
+      e.preventDefault();
+    };
+
+    let touchStartY = 0;
+    const handleTouchStart = (e) => {
+      if (e.touches && e.touches[0]) {
+        touchStartY = e.touches[0].clientY;
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      const messagesArea = messagesAreaRef.current;
+      if (!messagesArea || !messagesArea.contains(e.target)) {
+        e.preventDefault();
+        return;
+      }
+
+      const { scrollTop, scrollHeight, clientHeight } = messagesArea;
+      const maxScroll = scrollHeight - clientHeight;
+
+      if (maxScroll <= 1) {
+        e.preventDefault();
+        return;
+      }
+
+      if (e.touches && e.touches[0]) {
+        const currentY = e.touches[0].clientY;
+        const deltaY = touchStartY - currentY; // positive = scroll down, negative = scroll up
+
+        if ((deltaY < 0 && scrollTop <= 0) || (deltaY > 0 && scrollTop >= maxScroll - 1)) {
+          e.preventDefault();
+        }
+      }
+    };
+
+    windowEl.addEventListener('wheel', handleWheel, { passive: false });
+    windowEl.addEventListener('touchstart', handleTouchStart, { passive: true });
+    windowEl.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+    return () => {
+      if (isMobile) {
+        document.body.style.overflow = prevBodyOverflow;
+      }
+      windowEl.removeEventListener('wheel', handleWheel);
+      windowEl.removeEventListener('touchstart', handleTouchStart);
+      windowEl.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, [isOpen]);
 
   // Focus input on open
   useEffect(() => {
@@ -199,6 +301,7 @@ export default function AiChatbot() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            ref={chatWindowRef}
             className="cine-ai-window"
             initial={{ opacity: 0, scale: 0.9, y: 30, transformOrigin: "bottom right" }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -253,7 +356,7 @@ export default function AiChatbot() {
             </div>
 
             {/* Messages Scroll Area */}
-            <div className="chat-messages-area">
+            <div className="chat-messages-area" ref={messagesAreaRef}>
               {messages.map((msg) => (
                 <motion.div
                   key={msg.id}
@@ -524,6 +627,7 @@ export default function AiChatbot() {
           display: flex;
           flex-direction: column;
           overflow: hidden;
+          overscroll-behavior: contain;
         }
 
         /* HUD Header */
@@ -608,6 +712,8 @@ export default function AiChatbot() {
           background: rgba(16, 16, 16, 0.6);
           border-bottom: 1px solid var(--border-subtle);
           scrollbar-width: none;
+          overscroll-behavior: contain;
+          -webkit-overflow-scrolling: touch;
         }
 
         .chat-quick-prompts::-webkit-scrollbar {
@@ -643,6 +749,8 @@ export default function AiChatbot() {
           gap: 1rem;
           scrollbar-width: thin;
           scrollbar-color: rgba(229, 155, 85, 0.3) transparent;
+          overscroll-behavior: contain;
+          -webkit-overflow-scrolling: touch;
         }
 
         .chat-messages-area::-webkit-scrollbar {
